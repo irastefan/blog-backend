@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import multer from 'multer';
 
 import { loginValidation, registerValidation, postCreateValidation } from './validations.js';
 
@@ -14,16 +15,28 @@ mongoose.connect('mongodb+srv://admin:4rcfbf1A@cluster0.dwszgr4.mongodb.net/blog
 
 const app = express();
 
+const storage = multer.diskStorage({
+    destination: (_, __, cb) => {
+        cb(null, 'uploads');
+    },
+    filename: (_, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
+const upload = multer({ storage });
+
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 app.post('/auth/register', registerValidation, UserController.register);
-
 app.post('/auth/login', loginValidation, UserController.login);
-
 app.get('/auth/me', checkAuth, UserController.getMe);
 
-app.get('/', (req, res) => {
-    res.send('Blog');
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+    res.json({
+        url: `/uploads/${req.file.originalname}`,
+    });
 });
 
 app.get('/posts/:id', PostController.getOne);
