@@ -4,9 +4,8 @@ import multer from 'multer';
 
 import { loginValidation, registerValidation, postCreateValidation } from './validations.js';
 
-import checkAuth from './utils/checkAuth.js';
-import * as UserController from './controllers/UserController.js';
-import * as PostController from './controllers/PostController.js';
+import { UserController, PostController } from './controllers/index.js';
+import { handleValidationError, checkAuth } from './utils/index.js';
 
 mongoose.set('strictQuery', false);
 mongoose.connect('mongodb+srv://admin:4rcfbf1A@cluster0.dwszgr4.mongodb.net/blog?retryWrites=true&w=majority')
@@ -29,8 +28,8 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-app.post('/auth/register', registerValidation, UserController.register);
-app.post('/auth/login', loginValidation, UserController.login);
+app.post('/auth/register', registerValidation, handleValidationError, UserController.register);
+app.post('/auth/login', loginValidation, handleValidationError, UserController.login);
 app.get('/auth/me', checkAuth, UserController.getMe);
 
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
@@ -41,8 +40,8 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 
 app.get('/posts/:id', PostController.getOne);
 app.get('/posts', PostController.getAll);
-app.post('/posts', checkAuth, postCreateValidation, PostController.create);
-app.patch('/posts/:id', checkAuth, PostController.update);
+app.post('/posts', checkAuth, postCreateValidation, handleValidationError, PostController.create);
+app.patch('/posts/:id', checkAuth, postCreateValidation, handleValidationError, PostController.update);
 app.delete('/posts/:id', checkAuth, PostController.remove);
 
 app.listen(4444, (err) => {
