@@ -51,6 +51,35 @@ export const getAll = async (req, res) => {
     }
 }
 
+export const getAllOnPage = async (req, res) => {
+    try {
+        const page = req.params.page;
+        const count = 2;
+        const posts = await PostModel.find().skip(page * count - count).limit(count).populate('user').exec();
+
+        res.json(posts);
+    } catch (e) {
+        console.log(e);
+        res.status(505).json({
+            message: 'Not found',
+        });
+    }
+}
+
+export const getCountPages = async (req, res) => {
+    try {
+        const count = 2;
+        const posts = await PostModel.find().populate('user').exec();
+
+        res.json(Math.ceil(posts.length / count));
+    } catch (e) {
+        console.log(e);
+        res.status(505).json({
+            message: 'Not found',
+        });
+    }
+}
+
 export const getAllByTag = async (req, res) => {
     try {
         const tags = req.params.tag;

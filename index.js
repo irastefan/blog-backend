@@ -41,13 +41,15 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
     });
 });
 
-app.get('/posts/:id', PostController.getOne);
+app.get('/post/:id', PostController.getOne);
 app.get('/posts', PostController.getAll);
-app.get('/tags/:tag', PostController.getAllByTag);
+app.get('/posts/count', PostController.getCountPages);
+app.get('/posts/:page', PostController.getAllOnPage);
+app.get('/tag/:tag', PostController.getAllByTag);
 app.get('/tags', PostController.getLastTags);
-app.post('/posts', checkAuth, postCreateValidation, handleValidationError, PostController.create);
-app.patch('/posts/:id', checkAuth, postCreateValidation, handleValidationError, PostController.update);
-app.delete('/posts/:id', checkAuth, PostController.remove);
+app.post('/post', checkAuth, postCreateValidation, handleValidationError, PostController.create);
+app.patch('/post/:id', checkAuth, postCreateValidation, handleValidationError, PostController.update);
+app.delete('/post/:id', checkAuth, PostController.remove);
 
 app.listen(4444, (err) => {
     if (err) {
