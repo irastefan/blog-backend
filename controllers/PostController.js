@@ -28,7 +28,7 @@ export const getOne = async (req, res) => {
 
             res.json(doc);
         }
-      );
+      ).populate('user');
 
     } catch (e) {
         console.log(e);
@@ -51,13 +51,31 @@ export const getAll = async (req, res) => {
     }
 }
 
+export const getAllByTag = async (req, res) => {
+    try {
+        const tags = req.params.tag;
+        console.log('Tags: ', tags.split(',')[0]);
+        const posts = await PostModel.find(
+            {
+                tags: { $in: tags }, 
+            }).populate('user').exec();
+
+        res.json(posts);
+    } catch (e) {
+        console.log(e);
+        res.status(505).json({
+            message: 'Not found',
+        });
+    }
+}
+
 export const create = async (req, res) => {
     try {
         const doc = new PostModel({
             title: req.body.title,
             text: req.body.text,
             imageUrl: req.body.imageUrl,
-            tags: req.body.tags.split(','),
+            tags: req.body.tags.replace(/,\s*$/, "").split(','),
             user: req.userId,
         });
 
@@ -85,7 +103,7 @@ export const update = async (req, res) => {
                 text: req.body.text,
                 imageUrl: req.body.imageUrl,
                 user: req.userId,
-                tags: req.body.tags,
+                tags: req.body.tags.replace(/,\s*$/, "").split(','),
             },
       );
 
@@ -127,6 +145,25 @@ export const remove = async (req, res) => {
         }
       );
 
+    } catch (e) {
+        console.log(e);
+        res.status(505).json({
+            message: 'Not found',
+        });
+    }
+}
+
+export const getLastTags = async (req, res) => {
+    try {
+        const posts = await PostModel.find().limit(5).exec();
+
+        const tags = [...new Set(
+            posts
+            .map(obj => obj.tags)
+            .flat()
+        )].slice(0, 5);
+
+        res.json(tags);
     } catch (e) {
         console.log(e);
         res.status(505).json({
